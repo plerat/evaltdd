@@ -1,6 +1,8 @@
+from enumeration.ArticleType import ArticleType
+
 
 class Article:
-    def __init__(self, id: int, label: str, price: int, type: str):
+    def __init__(self, id: int, label: str, price: int, type: ArticleType):
         self._id = id
         self._label = label
         self._price = price

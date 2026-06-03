@@ -1,8 +1,9 @@
+from enumeration.CartStatus import CartStatus
 from model.Article import Article
 
 
 class ShoppingCart:
-    def __init__(self, id: int, articles: list, status: str, discount: int, history: list):
+    def __init__(self, id: int, articles: list, status: CartStatus, discount: int, history: list):
         self._id = id
         self._articles = articles
         self._gross_total = 0
