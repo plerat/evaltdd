@@ -1,6 +1,6 @@
 from enum import Enum
 
-class ResultatRuleType(Enum):
+class RuleName(Enum):
     CART_STATE = "CART_STATE"
     BASE_DISCOUNT = "BASE_DISCOUNT"
     SPECIAL = "SPECIAL ARTICLE"

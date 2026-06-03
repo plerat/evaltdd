@@ -6,6 +6,7 @@ import pytest
 from enumeration.ArticleType import ArticleType
 from enumeration.CartStatus import CartStatus
 from enumeration.ResultatRuleType import ResultatRuleType
+from enumeration.RuleName import RuleName
 from exception.AlreadyValidated import AlreadyValidatedError
 from exception.LockedCart import LockedCartError
 from model.Article import Article
@@ -280,7 +281,7 @@ class TestDiscountEngine:
         discount_engine = DiscountEngine(big_cart)
         discount_engine.calcul_discount()
         history = discount_engine.get_cart().get_history()
-        assert history[0][0] == "CLASSIC_DISCOUNT"
+        assert history[0][0] == RuleName.BASE_DISCOUNT
         assert history[0][1] == "IF 300 <= TOTAL_GROSS < 500"
         assert history[0][2] == 8
         assert history[0][3] == ResultatRuleType.APPLIED

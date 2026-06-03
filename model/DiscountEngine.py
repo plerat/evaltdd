@@ -3,6 +3,7 @@ import math
 from enumeration.ArticleType import ArticleType
 from enumeration.CartStatus import CartStatus
 from enumeration.ResultatRuleType import ResultatRuleType
+from enumeration.RuleName import RuleName
 from exception.AlreadyValidated import AlreadyValidatedError
 from exception.LockedCart import LockedCartError
 from model.Article import Article
@@ -26,18 +27,18 @@ class DiscountEngine:
 
     def modify_discount(self, new_discount: int):
         if self._cart.get_status() == CartStatus.VALIDATED:
-            self._cart.get_history().append(("VALIDATED CART", "IF CART VALIDATED", new_discount, ResultatRuleType.REFUSED, datetime.today()))
+            self._cart.get_history().append((RuleName.CART_STATE, "IF CART VALIDATED", new_discount, ResultatRuleType.REFUSED, datetime.today()))
             raise AlreadyValidatedError("Error. Cart already validated")
         if self._cart.get_status() == CartStatus.LOCKED:
             self._cart.get_history().append(
-                ("LOCKED CART", "IF CART LOCKED", new_discount, ResultatRuleType.REFUSED, datetime.today()))
+                (RuleName.CART_STATE, "IF CART LOCKED", new_discount, ResultatRuleType.REFUSED, datetime.today()))
             raise LockedCartError("Error. Cart already locked")
         if new_discount > 30:
             new_discount = 30
-            self._cart.get_history().append(("CEILING", "IF DISCOUNT > 30", 30, ResultatRuleType.APPLIED, datetime.today()))
+            self._cart.get_history().append((RuleName.CEILING_DISCOUNT, "IF DISCOUNT > 30", 30, ResultatRuleType.APPLIED, datetime.today()))
         if new_discount > 25:
             self._cart.set_status(CartStatus.VALIDATED)
-            self._cart.get_history().append(("VALIDATED CART", "IF DISCOUNT > 25", 25, ResultatRuleType.APPLIED, datetime.today()))
+            self._cart.get_history().append((RuleName.CART_STATE, "IF DISCOUNT > 25", 25, ResultatRuleType.APPLIED, datetime.today()))
         self._cart.set_discount(new_discount)
 
     def add_articles(self, new_article: Article):
@@ -69,29 +70,29 @@ class DiscountEngine:
                 total_gross += article.get_price()
         if 100 <= total_gross < 300:
             total_discount = 5
-            self._cart.get_history().append(("CLASSIC_DISCOUNT", "IF 100 <= TOTAL_GROSS < 300", 5, ResultatRuleType.APPLIED, datetime.today()))
+            self._cart.get_history().append((RuleName.BASE_DISCOUNT, "IF 100 <= TOTAL_GROSS < 300", 5, ResultatRuleType.APPLIED, datetime.today()))
         elif 300 <= total_gross < 500:
             total_discount = 8
-            self._cart.get_history().append(("CLASSIC_DISCOUNT", "IF 300 <= TOTAL_GROSS < 500", 8, ResultatRuleType.APPLIED, datetime.today()))
+            self._cart.get_history().append((RuleName.BASE_DISCOUNT, "IF 300 <= TOTAL_GROSS < 500", 8, ResultatRuleType.APPLIED, datetime.today()))
         elif 500 <= total_gross:
             total_discount = 10
             self._cart.get_history().append(
-                ("CLASSIC_DISCOUNT", "IF 500 < TOTAL_GROSS", 10, ResultatRuleType.APPLIED, datetime.today()))
+                (RuleName.BASE_DISCOUNT, "IF 500 < TOTAL_GROSS", 10, ResultatRuleType.APPLIED, datetime.today()))
         else:
             total_discount = 0
-            self._cart.get_history().append(("CLASSIC_DISCOUNT", "IF 0 <= TOTAL_GROSS < 100", 0, ResultatRuleType.APPLIED, datetime.today()))
+            self._cart.get_history().append((RuleName.BASE_DISCOUNT, "IF 0 <= TOTAL_GROSS < 100", 0, ResultatRuleType.APPLIED, datetime.today()))
 
         for article in self._cart.get_articles():
             if article.get_type() == ArticleType.SPECIAL and discount_special == False and self.calcul_gross_total_with_quantity_rule() >= 500:
                 total_discount += 8
                 discount_special = True
                 self._cart.get_history().append(
-                    ("SPECIAL_DISCOUNT", "IF TOTAL_GROSS => 500 AND SPECIAL", 8, ResultatRuleType.APPLIED, datetime.today()))
+                    (RuleName.SPECIAL, "IF TOTAL_GROSS => 500 AND SPECIAL", 8, ResultatRuleType.APPLIED, datetime.today()))
             if article.get_type() == ArticleType.SPECIAL and discount_special == False:
                 total_discount += 3
                 discount_special = True
                 self._cart.get_history().append(
-                    ("SPECIAL_DISCOUNT", "IF TOTAL_GROSS < 500 AND SPECIAL", 3, ResultatRuleType.APPLIED, datetime.today()))
+                    (RuleName.SPECIAL, "IF TOTAL_GROSS < 500 AND SPECIAL", 3, ResultatRuleType.APPLIED, datetime.today()))
         if total_discount == 0:
             total_discount = 1
         self.modify_discount(total_discount)
