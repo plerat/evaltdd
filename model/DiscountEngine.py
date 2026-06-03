@@ -59,11 +59,12 @@ class DiscountEngine:
 
     def calcul_net_total(self):
         gross_total = self.calcul_gross_total_with_quantity_rule()
+        if self._cart.get_discount() == 0:
+            return gross_total * math.ceil(1 - (self._cart.get_discount() / 100))
         return gross_total *  math.ceil(1 - (self._cart.get_discount() / 100))
 
     def calcul_discount(self):
         total_gross = 0
-        total_discount = 0
         discount_special = False
         for article in self._cart.get_articles():
             if article.get_type() != ArticleType.CLEARANCE:
@@ -93,8 +94,6 @@ class DiscountEngine:
                 discount_special = True
                 self._cart.get_history().append(
                     (RuleName.SPECIAL, "IF TOTAL_GROSS < 500 AND SPECIAL", 3, ResultatRuleType.APPLIED, datetime.today()))
-        if total_discount == 0:
-            total_discount = 1
         self.modify_discount(total_discount)
 
 

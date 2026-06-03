@@ -195,7 +195,7 @@ class TestDiscountEngine:
     def test_if_total_inferior_to_hundred_discount_is_0(self, cart):
         discount_engine = DiscountEngine(cart)
         discount_engine.calcul_discount()
-        assert discount_engine.get_cart().get_discount() == 1
+        assert discount_engine.get_cart().get_discount() == 0
 
     def test_if_total_superior_to_hundred_discount_is_5(self, medium_cart):
         discount_engine = DiscountEngine(medium_cart)
@@ -240,6 +240,7 @@ class TestDiscountEngine:
 
     def test_if_article_clearance_not_participate_in_discount(self, cart_with_clearance_article):
         discount_engine = DiscountEngine(cart_with_clearance_article)
+        discount_engine.calcul_discount()
         articles = discount_engine.get_cart().get_articles()
         assert articles[0].get_type() == ArticleType.CLEARANCE
         assert articles[1].get_type() == ArticleType.CLEARANCE
@@ -260,8 +261,6 @@ class TestDiscountEngine:
         assert discount_engine.calcul_net_total() == net_expected_price
 
     ### Rules 6 ceiling global for discount
-
-
     def test_discount_cant_be_superior_than_30_of_gross_total(self, cart):
         discount_engine = DiscountEngine(cart)
         discount_engine.modify_discount(35)
