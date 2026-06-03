@@ -1,4 +1,4 @@
-import copy
+from model.Article import Article
 
 
 class ShoppingCart:
@@ -9,12 +9,16 @@ class ShoppingCart:
         self._net_total = 0
         self._status = status
         self._discount = discount
-        self._history = history
+        self.__history = history
 
     def get_id(self):
         return self._id
 
     def get_articles(self):
+        return self._articles
+
+    def add_article(self, articles: Article) -> list:
+        self._articles.append(articles)
         return self._articles
 
     def set_articles(self, articles: list):
@@ -46,6 +50,6 @@ class ShoppingCart:
         self._status = status
 
     def get_history(self):
-        return self._history
+        return self.__history
 
 

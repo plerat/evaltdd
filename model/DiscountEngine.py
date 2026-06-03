@@ -1,17 +1,22 @@
+import math
+
 from exception.AlreadyValidated import AlreadyValidatedError
 from exception.LockedCart import LockedCartError
 from model.Article import Article
 from model.ShoppingCart import ShoppingCart
 from datetime import datetime
+import copy
 
 
 class DiscountEngine:
     def __init__(self, cart: ShoppingCart):
         self._cart = cart
 
-
     def get_cart(self):
         return self._cart
+
+    def get_freeze_history(self):
+        return copy.copy(self._cart.get_history())
 
     def modify_status(self, new_status: str):
         self._cart.set_status(new_status)
@@ -40,7 +45,7 @@ class DiscountEngine:
         articles = self._cart.get_articles()
         articles.append(new_article)
 
-    def calcul_gross_total(self):
+    def calcul_gross_total_with_quantity_rule(self):
         articles = self._cart.get_articles()
         gross_total_before_discount = self._cart.get_gross_total()
         for article in set(articles):
@@ -49,19 +54,16 @@ class DiscountEngine:
         return gross_total_before_discount
 
     def calcul_net_total(self):
-        self._cart.get_gross_total() * self._cart.get_discount()
-
-    def ensure_that_discount_not_greater_than_30(self, discount):
-        if discount > 30:
-            discount = 30
-        return discount
+        gross_total = self.calcul_gross_total_with_quantity_rule()
+        return gross_total *  math.ceil(1 - (self._cart.get_discount() / 100))
 
     def calcul_discount(self):
         total_gross = 0
         total_discount = 0
         discount_special = False
         for article in self._cart.get_articles():
-            total_gross += article.get_price()
+            if article.get_type() != "CLEARANCE":
+                total_gross += article.get_price()
         if 100 <= total_gross < 300:
             total_discount = 5
             self._cart.get_history().append(("CLASSIC_DISCOUNT", "IF 100 <= TOTAL_GROSS < 300", 5, "APPLIED", datetime.today()))
@@ -76,7 +78,7 @@ class DiscountEngine:
             total_discount = 0
             self._cart.get_history().append(("CLASSIC_DISCOUNT", "IF 0 <= TOTAL_GROSS < 100", 0, "APPLIED", datetime.today()))
         for article in self._cart.get_articles():
-            if article.get_type() == "SPECIAL" and discount_special == False and self.calcul_gross_total() >= 500:
+            if article.get_type() == "SPECIAL" and discount_special == False and self.calcul_gross_total_with_quantity_rule() >= 500:
                 total_discount += 8
                 discount_special = True
                 self._cart.get_history().append(
@@ -86,6 +88,8 @@ class DiscountEngine:
                 discount_special = True
                 self._cart.get_history().append(
                     ("SPECIAL_DISCOUNT", "IF TOTAL_GROSS < 500 AND SPECIAL", 3, "APPLIED", datetime.today()))
+        if total_discount == 0:
+            total_discount = 1
         self.modify_discount(total_discount)
 
 
