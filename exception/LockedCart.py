@@ -1,0 +1,2 @@
+class LockedCartError(Exception):
+    pass

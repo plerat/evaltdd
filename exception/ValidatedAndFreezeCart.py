@@ -1,0 +1,2 @@
+class ValidatedAndFreezeCart(Exception):
+    pass

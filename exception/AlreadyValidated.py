@@ -1,0 +1,2 @@
+class AlreadyValidatedError(Exception):
+    pass

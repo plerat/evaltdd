@@ -1,0 +1,2 @@
+class DiscountTooHigh(Exception):
+    pass
